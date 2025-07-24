@@ -14,3 +14,15 @@ socket.on('newQuestion', (data) => {
     optionsDiv.appendChild(btn);
   });
 });
+
+socket.on('showCorrectAnswer', (data) => {
+  const allButtons = document.querySelectorAll('#options button');
+  allButtons.forEach((btn) => {
+    if (btn.textContent === data.correct) {
+      btn.style.backgroundColor = 'lightgreen';  // 正解の色
+    } else {
+      btn.style.backgroundColor = 'lightcoral';  // 不正解の色
+    }
+    btn.disabled = true;  // すべてのボタンを無効に
+  });
+});

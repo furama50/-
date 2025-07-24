@@ -12,3 +12,11 @@ document.getElementById('sendBtn').addEventListener('click', () => {
 
   socket.emit('sendQuestion', { question, options, correct });
 });
+
+const revealBtn = document.createElement("button");
+revealBtn.textContent = "正解を表示";
+revealBtn.onclick = () => {
+  const correct = document.getElementById('correct').value;
+  socket.emit("revealAnswer", { correct });
+};
+document.body.appendChild(revealBtn);
