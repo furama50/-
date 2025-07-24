@@ -7,10 +7,18 @@
 </head>
 <body>
   <h2>プレイヤー画面</h2>
-  <div id="question"></div>
-  <div id="options"></div>
+  <div id="nameArea">
+    <input id="playerName" placeholder="あなたの名前を入力">
+    <button id="startBtn">開始</button>
+  </div>
+
+  <div id="quizArea" style="display:none;">
+    <div id="question"></div>
+    <div id="options"></div>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="script-player.js"></script>
 </body>
+
 </html>

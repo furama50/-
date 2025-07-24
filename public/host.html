@@ -16,6 +16,18 @@
   <button id="nextBtn">次の問題へ</button>
   <button id="revealBtn" disabled>正解を表示</button>
 
+  <hr>
+
+  <div>
+    <h3>回答一覧</h3>
+    <ul id="answerList"></ul>
+  </div>
+
+  <div>
+    <h3>🎉 正解者からの抽選結果：</h3>
+    <div id="winnerDisplay">（まだ選ばれていません）</div>
+  </div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="script-host.js"></script>
 </body>

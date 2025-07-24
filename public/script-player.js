@@ -1,48 +1,44 @@
 const socket = io();
-
-let answerLocked = false; // 正解発表後はロック
+let playerName = '';
+let answerLocked = false;
 let selectedButton = null;
 
+document.getElementById('startBtn').onclick = () => {
+  playerName = document.getElementById('playerName').value.trim();
+  if (!playerName) return alert("名前を入力してください");
+
+  socket.emit('registerPlayer', { name: playerName });
+
+  document.getElementById('nameArea').style.display = 'none';
+  document.getElementById('quizArea').style.display = 'block';
+};
+
 socket.on('newQuestion', (data) => {
-  document.getElementById('question').innerText = data.question;
-
   const optionsDiv = document.getElementById('options');
+  document.getElementById('question').innerText = data.question;
   optionsDiv.innerHTML = '';
-
-  answerLocked = false; // 問題が新しくなったらロック解除
+  answerLocked = false;
   selectedButton = null;
 
   data.options.forEach((opt) => {
     const btn = document.createElement('button');
     btn.textContent = opt;
-    btn.style.margin = '4px';
-
     btn.onclick = () => {
       if (answerLocked) return;
-
-      // 前の選択ボタンの色を戻す
-      if (selectedButton) {
-        selectedButton.style.backgroundColor = '';
-      }
-
-      // 現在のボタンに選択色
+      if (selectedButton) selectedButton.style.backgroundColor = '';
       btn.style.backgroundColor = '#87CEFA';
       selectedButton = btn;
 
-      // 回答送信（何度でも送れる）
-      socket.emit('sendAnswer', { answer: opt });
+      socket.emit('sendAnswer', { answer: opt, name: playerName });
     };
-
     optionsDiv.appendChild(btn);
   });
 });
 
-// ホストが正解を発表したらロック＆正解表示
 socket.on('showCorrectAnswer', (data) => {
   answerLocked = true;
-
   const allButtons = document.querySelectorAll('#options button');
-  allButtons.forEach((btn) => {
+  allButtons.forEach(btn => {
     btn.disabled = true;
     if (btn.textContent === data.correct) {
       btn.style.border = '3px solid green';

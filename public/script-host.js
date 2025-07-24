@@ -24,6 +24,8 @@ const nextBtn = document.getElementById('nextBtn');
 const revealBtn = document.getElementById('revealBtn');
 const questionDisplay = document.getElementById('questionDisplay');
 const optionDisplay = document.getElementById('optionDisplay');
+const answerList = document.getElementById('answerList');
+const winnerDisplay = document.getElementById('winnerDisplay');
 
 function showCurrentQuestion(q) {
   questionDisplay.textContent = q.question;
@@ -33,6 +35,8 @@ function showCurrentQuestion(q) {
     li.textContent = opt;
     optionDisplay.appendChild(li);
   });
+  answerList.innerHTML = '';
+  winnerDisplay.textContent = '（まだ選ばれていません）';
 }
 
 nextBtn.addEventListener('click', () => {
@@ -53,6 +57,28 @@ revealBtn.addEventListener('click', () => {
   const correct = questions[currentIndex - 1]?.correct;
   if (correct) {
     socket.emit('revealAnswer', { correct });
-    revealBtn.disabled = true; // 二重送信防止
+    revealBtn.disabled = true;
+  }
+});
+
+// プレイヤーの回答を表示
+socket.on('playerAnswer', (data) => {
+  const existing = [...answerList.children].find(li => li.dataset.name === data.name);
+  if (existing) {
+    existing.textContent = `${data.name}：${data.answer}`;
+  } else {
+    const li = document.createElement('li');
+    li.dataset.name = data.name;
+    li.textContent = `${data.name}：${data.answer}`;
+    answerList.appendChild(li);
+  }
+});
+
+// 正解者と代表を表示
+socket.on('correctPlayers', (data) => {
+  winnerDisplay.textContent = `🎯 抽選で選ばれたのは「${data.winner}」さん！`;
+
+  if (data.correctPlayers.length === 0) {
+    winnerDisplay.textContent = "😢 正解者がいませんでした";
   }
 });
