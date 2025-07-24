@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ホスト</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>ホスト画面</h1>
+  <button onclick="sendQuestion()">問題を送信</button>
+  <button onclick="revealAnswer()">正解を表示</button>
+
+  <script>
+    const socket = io();
+    const quiz = [
+      { question: "1+1は？", options: ["1", "2", "3", "4"], correct: "2" },
+      { question: "日本の首都は？", options: ["大阪", "東京", "京都", "福岡"], correct: "東京" }
+    ];
+    let current = 0;
+
+    function sendQuestion() {
+      if (current < quiz.length) {
+        socket.emit("sendQuestion", quiz[current]);
+      }
+    }
+
+    function revealAnswer() {
+      socket.emit("revealAnswer", { correct: quiz[current].correct });
+      current++;
+    }
+
+    socket.on("playerAnswer", (data) => {
+      console.log("🎯 プレイヤーの回答:", data.answer);
+    });
+  </script>
+</body>
+</html>
