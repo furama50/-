@@ -1,34 +1,30 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>ホスト画面</title>
 </head>
 <body>
   <h2>ホスト画面</h2>
 
-  <div id="currentQuestionBox">
-    <p><strong>現在の問題:</strong></p>
-    <div id="questionDisplay"></div>
-    <ul id="optionDisplay"></ul>
-  </div>
-
-  <button id="nextBtn">次の問題へ</button>
+  <button id="nextBtn">次の問題を出す</button>
   <button id="revealBtn" disabled>正解を表示</button>
+
+  <div id="currentQuestionBox">
+    <h3>現在の問題</h3>
+    <div id="questionDisplay"></div>
+  </div>
 
   <hr>
 
-  <div>
-    <h3>回答一覧</h3>
-    <ul id="answerList"></ul>
-  </div>
+  <h3>回答一覧</h3>
+  <ul id="answerList"></ul>
 
-  <div>
-    <h3>🎉 正解者からの抽選結果：</h3>
-    <div id="winnerDisplay">（まだ選ばれていません）</div>
-  </div>
+  <h3>🎉 正解者からの抽選結果</h3>
+  <div id="winnerDisplay">（まだ選ばれていません）</div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="script-host.js"></script>
 </body>
 </html>
+

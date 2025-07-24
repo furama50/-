@@ -1,29 +1,25 @@
-<!-- public/player.html -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>プレイヤー画面</title>
+  <title>プレイヤー画面（記述式）</title>
 </head>
 <body>
   <h2>プレイヤー画面</h2>
+
   <div id="nameArea">
-    <input id="playerName" placeholder="あなたの名前を入力">
+    <input id="playerName" placeholder="あなたの名前">
     <button id="startBtn">開始</button>
   </div>
 
   <div id="quizArea" style="display:none;">
-    <div id="question"></div>
-    <div id="options"></div>
+    <div id="question"></div><br>
+    <input id="answerInput" placeholder="ここに回答を入力" style="width: 250px;">
+    <button id="answerBtn">回答を送信</button>
+    <div id="winnerBox" style="margin-top: 20px;"></div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="script-player.js"></script>
 </body>
 </html>
-<style>
-  #winnerBox {
-    font-size: 1.2em;
-    color: #2e8b57;
-  }
-</style>
