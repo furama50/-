@@ -45,3 +45,20 @@ socket.on('showCorrectAnswer', (data) => {
     }
   });
 });
+
+// 正解者代表の表示
+socket.on('correctPlayers', (data) => {
+  let winnerBox = document.getElementById('winnerBox');
+  if (!winnerBox) {
+    winnerBox = document.createElement('div');
+    winnerBox.id = 'winnerBox';
+    winnerBox.style.marginTop = '20px';
+    document.body.appendChild(winnerBox);
+  }
+
+  if (data.correctPlayers.length > 0) {
+    winnerBox.innerHTML = `<strong>🎉 正解者の中から選ばれたのは：${data.winner} さん！</strong>`;
+  } else {
+    winnerBox.innerHTML = `<strong>😢 正解者がいませんでした</strong>`;
+  }
+});
