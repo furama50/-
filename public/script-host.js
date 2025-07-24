@@ -20,11 +20,39 @@ const questions = [
 
 let currentIndex = 0;
 
-document.getElementById('nextBtn').addEventListener('click', () => {
+const nextBtn = document.getElementById('nextBtn');
+const revealBtn = document.getElementById('revealBtn');
+const questionDisplay = document.getElementById('questionDisplay');
+const optionDisplay = document.getElementById('optionDisplay');
+
+function showCurrentQuestion(q) {
+  questionDisplay.textContent = q.question;
+  optionDisplay.innerHTML = '';
+  q.options.forEach((opt) => {
+    const li = document.createElement('li');
+    li.textContent = opt;
+    optionDisplay.appendChild(li);
+  });
+}
+
+nextBtn.addEventListener('click', () => {
   if (currentIndex < questions.length) {
-    socket.emit('sendQuestion', questions[currentIndex]);
+    const q = questions[currentIndex];
+    socket.emit('sendQuestion', q);
+    showCurrentQuestion(q);
+    revealBtn.disabled = false;
     currentIndex++;
   } else {
     alert("すべての問題を出題しました！");
+    nextBtn.disabled = true;
+    revealBtn.disabled = true;
+  }
+});
+
+revealBtn.addEventListener('click', () => {
+  const correct = questions[currentIndex - 1]?.correct;
+  if (correct) {
+    socket.emit('revealAnswer', { correct });
+    revealBtn.disabled = true; // 二重送信防止
   }
 });

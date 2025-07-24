@@ -6,7 +6,15 @@
 </head>
 <body>
   <h2>ホスト画面</h2>
+
+  <div id="currentQuestionBox">
+    <p><strong>現在の問題:</strong></p>
+    <div id="questionDisplay"></div>
+    <ul id="optionDisplay"></ul>
+  </div>
+
   <button id="nextBtn">次の問題へ</button>
+  <button id="revealBtn" disabled>正解を表示</button>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="script-host.js"></script>
