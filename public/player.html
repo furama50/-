@@ -1,36 +1,16 @@
+<!-- public/player.html -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>プレイヤー</title>
-  <script src="/socket.io/socket.io.js"></script>
+  <title>プレイヤー画面</title>
 </head>
 <body>
-  <h2>問題：</h2>
-  <div id="question">待機中...</div>
+  <h2>プレイヤー画面</h2>
+  <div id="question"></div>
   <div id="options"></div>
-  <div id="result"></div>
 
-  <script>
-    const socket = io();
-
-    socket.on("newQuestion", (data) => {
-      document.getElementById("question").textContent = data.question;
-      const optionsDiv = document.getElementById("options");
-      optionsDiv.innerHTML = "";
-      data.options.forEach((opt) => {
-        const btn = document.createElement("button");
-        btn.textContent = opt;
-        btn.onclick = () => {
-          socket.emit("sendAnswer", { answer: opt });
-        };
-        optionsDiv.appendChild(btn);
-      });
-    });
-
-    socket.on("showCorrectAnswer", (data) => {
-      document.getElementById("result").textContent = "正解は: " + data.correct;
-    });
-  </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script-player.js"></script>
 </body>
 </html>
