@@ -202,6 +202,17 @@
 
     socket.on('modeChanged', (mode) => {
       currentMode = mode;
+
+      if (mode === 'quiz') {
+        document.getElementById('quizArea').style.display = 'block';
+        document.getElementById('buzzerArea').style.display = 'none';
+        document.getElementById('answerInput').disabled = false;
+        document.getElementById('answerBtn').disabled = false;
+      } else if (mode === 'buzzer') {
+        document.getElementById('quizArea').style.display = 'none';
+        document.getElementById('buzzerArea').style.display = 'block';
+        document.getElementById('buzzerBtn').disabled = false;
+      }
     });
 
     socket.on('buzzerResult', (data) => {
