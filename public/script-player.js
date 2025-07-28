@@ -21,12 +21,21 @@ document.getElementById('startBtn').onclick = () => {
   quizArea.style.display = 'block';
 };
 
+// 回答ボタン押下時に、自分の回答を表示
 document.getElementById('answerBtn').onclick = () => {
   if (answerLocked) return;
-  const input = answerInput.value.trim();
+  const input = document.getElementById('answerInput').value.trim();
   if (!input) return alert("回答を入力してください");
 
   socket.emit('sendAnswer', { name: playerName, answer: input });
+
+  // 👇 自分の回答を画面に表示
+  document.getElementById('selfAnswerDisplay').textContent = `あなたの回答：${input}`;
+
+  // 任意：回答後、ロックされたかのようなUI
+  answerLocked = true;
+  document.getElementById('answerInput').disabled = true;
+  document.getElementById('answerBtn').disabled = true;
 };
 
 buzzerBtn.onclick = () => {
@@ -45,6 +54,9 @@ socket.on('newQuestion', (data) => {
   winnerBox.textContent = '';
   buzzerResult.textContent = '';
   answerLocked = false;
+
+  document.getElementById('winnerBox').textContent = '';
+  document.getElementById('selfAnswerDisplay').textContent = '';
 });
 
 // 正解者一覧・抽選結果
