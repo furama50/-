@@ -95,7 +95,7 @@ socket.on('modeChanged', (mode) => {
 
 // 誰が早押しに成功したか表示
 socket.on('buzzerResult', ({ winner }) => {
-  buzzerResult.innerHTML = `🎉 回答権は <strong>${winner}</strong> さん！`;
+  buzzerResult.innerHTML = `🚨 回答権は <strong>${winner}</strong> さんです！`;
   buzzerBtn.disabled = true;
 });
 
