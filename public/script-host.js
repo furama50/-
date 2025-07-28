@@ -57,3 +57,17 @@ socket.on('correctPlayers', (data) => {
     : "😢 正解者がいませんでした";
 });
 
+// 参加者一覧の受信と表示
+socket.on('updatePlayerList', (names) => {
+  const playerList = document.getElementById('playerList');
+  const playerCount = document.getElementById('playerCount');
+
+  playerList.innerHTML = '';
+  names.forEach(name => {
+    const li = document.createElement('li');
+    li.textContent = name;
+    playerList.appendChild(li);
+  });
+
+  playerCount.textContent = `(${names.length}人)`;
+});

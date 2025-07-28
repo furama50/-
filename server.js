@@ -20,6 +20,10 @@ io.on("connection", (socket) => {
   socket.on("registerPlayer", (data) => {
     players[socket.id] = { name: data.name };
     console.log(`📝 登録: ${socket.id} → ${data.name}`);
+
+    // 現在のプレイヤー一覧を全員（特にホスト）に通知
+    const playerList = Object.values(players).map(p => p.name);
+    io.emit("updatePlayerList", playerList);
   });
 
   // ホストが問題を送信
@@ -59,7 +63,7 @@ io.on("connection", (socket) => {
     const correctPlayers = currentAnswers.filter(a =>
       correctList.some(c => a.answer.trim().toLowerCase() === c.trim().toLowerCase())
     );
-    
+
     const winner =
       correctPlayers.length > 0
         ? correctPlayers[Math.floor(Math.random() * correctPlayers.length)]
@@ -75,6 +79,9 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("👋 ユーザー切断:", socket.id);
     delete players[socket.id];
+
+    const playerList = Object.values(players).map(p => p.name);
+    io.emit("updatePlayerList", playerList);
   });
 });
 
