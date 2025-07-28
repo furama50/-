@@ -45,6 +45,8 @@ buzzerBtn.onclick = () => {
 // 正解の表示処理
 socket.on('showCorrectAnswer', (data) => {
   answerLocked = true;
+  const correct = Array.isArray(data.correct) ? data.correct.join(' / ') : data.correct;
+  document.getElementById('winnerBox').innerHTML = `✅ 正解：<strong>${correct}</strong>`;
 });
 
 // 新しい問題が出たとき

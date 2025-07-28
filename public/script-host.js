@@ -112,3 +112,11 @@ socket.on('modeChanged', (mode) => {
   currentMode = mode;
   modeSelect.value = mode;
 });
+
+// 早押し成功者をホスト画面にも表示
+socket.on('buzzerResult', (data) => {
+  const winnerDisplay = document.getElementById('winnerDisplay');
+  if (winnerDisplay) {
+    winnerDisplay.innerHTML = `🚨 回答権は <strong>${data.winner}</strong> さんです！`;
+  }
+});
