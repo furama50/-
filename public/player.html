@@ -156,6 +156,10 @@
         setTimeout(() => {
           document.getElementById('answerInput').classList.remove('highlight');
         }, 1000);
+
+      // ✅ 自分の回答と変更可能なことを表示
+        document.getElementById('selfAnswerDisplay').textContent =
+          `あなたの回答：${data.answer}（※あとから変更できます）`;
       }
     });
 
