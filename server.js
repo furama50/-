@@ -83,6 +83,10 @@ io.on("connection", (socket) => {
     const playerList = Object.values(players).map(p => p.name);
     io.emit("updatePlayerList", playerList);
   });
+
+    // 新しく接続したクライアントに、現在のプレイヤー一覧を送信
+  const currentPlayerList = Object.values(players).map(p => p.name);
+  socket.emit("updatePlayerList", currentPlayerList);
 });
 
 server.listen(PORT, () => {
