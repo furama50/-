@@ -44,18 +44,6 @@
       font-weight: bold;
     }
 
-    #winnerBox {
-      font-size: 1.3rem;
-      text-align: center;
-      margin-top: 1em;
-      font-weight: bold;
-      color: #222;
-    }
-
-    #answerBox {
-      margin-top: 1em;
-    }
-
     .highlight {
       background-color: #fff8c6;
       padding: 0.5em;
@@ -70,34 +58,34 @@
       font-weight: bold;
     }
 
-    #buzzerArea {
-      text-align: center;
-      margin-top: 2em;
+    .section {
+      margin-top: 1.5em;
     }
 
-    #buzzerQuestion {
+    .center {
+      text-align: center;
+    }
+
+    #winnerBox, #buzzerResult {
       font-size: 1.2rem;
       font-weight: bold;
-      margin-bottom: 1rem;
-    }
-
-    #buzzerResult {
-      font-size: 1.2rem;
+      color: #222;
       margin-top: 1em;
     }
   </style>
 </head>
 <body>
 
+  <!-- 名前入力エリア -->
   <div id="nameArea">
     <h2>名前を入力してください</h2>
     <input type="text" id="playerName" placeholder="例：たろう">
     <button id="startBtn">参加</button>
   </div>
 
-  <!-- 通常モード -->
+  <!-- 通常モード（クイズ） -->
   <div id="quizArea" style="display: none;">
-    <div id="question">問題が表示されます</div>
+    <div id="question"></div>
 
     <div id="answerBox">
       <input type="text" id="answerInput" placeholder="ここに回答を入力">
@@ -106,18 +94,129 @@
     </div>
 
     <p id="selfAnswerDisplay" style="font-weight:bold; color: #333;"></p>
-    <div id="winnerBox"></div>
+
     <div id="correctDisplay" class="correct-answer" style="display: none;"></div>
+    <div id="winnerBox" class="section"></div>
   </div>
 
   <!-- 早押しモード -->
-  <div id="buzzerArea" style="display: none;">
-    <div id="buzzerQuestion">早押しクイズ</div>
-    <button id="buzzerBtn" style="font-size: 1.4rem;">早押しボタン！</button>
+  <div id="buzzerArea" style="display: none;" class="center">
+    <div id="question"></div>
+    <button id="buzzerBtn" style="font-size: 1.4rem;">🚨 早押しボタン！</button>
     <div id="buzzerResult"></div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="script-player.js"></script>
+  <script>
+    const socket = io();
+    let playerName = '';
+    let answerLocked = false;
+    let currentMode = 'quiz';
+
+    // DOM取得
+    const nameArea = document.getElementById('nameArea');
+    const quizArea = document.getElementById('quizArea');
+    const buzzerArea = document.getElementById('buzzerArea');
+    const questionElem = document.getElementById('question');
+    const answerInput = document.getElementById('answerInput');
+    const answerBtn = document.getElementById('answerBtn');
+    const buzzerBtn = document.getElementById('buzzerBtn');
+    const buzzerResult = document.getElementById('buzzerResult');
+    const winnerBox = document.getElementById('winnerBox');
+    const correctDisplay = document.getElementById('correctDisplay');
+    const selfAnswerDisplay = document.getElementById('selfAnswerDisplay');
+
+    // 名前入力 → 参加
+    document.getElementById('startBtn').onclick = () => {
+      playerName = document.getElementById('playerName').value.trim();
+      if (!playerName) return alert("名前を入力してください");
+      socket.emit('registerPlayer', { name: playerName });
+
+      nameArea.style.display = 'none';
+    };
+
+    // 回答送信
+    answerBtn.onclick = () => {
+      if (answerLocked) return;
+      const input = answerInput.value.trim();
+      if (!input) return alert("回答を入力してください");
+
+      socket.emit('sendAnswer', { name: playerName, answer: input });
+    };
+
+    // 早押しボタン押下
+    buzzerBtn.onclick = () => {
+      socket.emit('buzzPressed');
+      buzzerBtn.disabled = true;
+    };
+
+    // 新しい問題
+    socket.on('newQuestion', (data) => {
+      questionElem.innerText = data.question;
+      answerInput.value = '';
+      buzzerResult.textContent = '';
+      winnerBox.textContent = '';
+      correctDisplay.style.display = 'none';
+      selfAnswerDisplay.textContent = '';
+      answerLocked = false;
+      buzzerBtn.disabled = false;
+    });
+
+    // 自分の回答を表示
+    socket.on('playerAnswer', (data) => {
+      if (data.name === playerName) {
+        answerInput.classList.add('highlight');
+        setTimeout(() => {
+          answerInput.classList.remove('highlight');
+        }, 800);
+        selfAnswerDisplay.textContent = `あなたの回答：${data.answer}（※あとから変更できます）`;
+      }
+    });
+
+    // 正解表示
+    socket.on('showCorrectAnswer', (data) => {
+      answerLocked = true;
+      const correct = Array.isArray(data.correct) ? data.correct.join(' / ') : data.correct;
+      correctDisplay.textContent = `✅ 正解：${correct}`;
+      correctDisplay.style.display = 'block';
+    });
+
+    // 抽選結果
+    socket.on('correctPlayers', (data) => {
+      const { correctPlayers, winner } = data;
+      if (correctPlayers.length === 0) {
+        winnerBox.textContent = "😢 正解者がいませんでした";
+      } else {
+        winnerBox.innerHTML = `🎉 正解者の中から選ばれたのは：<strong>${winner}</strong> さん！`;
+      }
+    });
+
+    // モード切替
+    socket.on('modeChanged', (mode) => {
+      currentMode = mode;
+      if (mode === 'quiz') {
+        quizArea.style.display = 'block';
+        buzzerArea.style.display = 'none';
+        answerInput.disabled = false;
+        answerBtn.disabled = false;
+      } else {
+        quizArea.style.display = 'none';
+        buzzerArea.style.display = 'block';
+        buzzerBtn.disabled = buzzerResult.textContent !== '';
+      }
+    });
+
+    // 早押し結果
+    socket.on('buzzerResult', (data) => {
+      buzzerResult.innerHTML = `🚨 回答権は <strong>${data.winner}</strong> さんです！`;
+      buzzerBtn.disabled = true;
+    });
+
+    // 早押しリセット
+    socket.on('buzzerReset', () => {
+      buzzerResult.textContent = '';
+      buzzerBtn.disabled = false;
+    });
+  </script>
 </body>
 </html>
