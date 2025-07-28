@@ -12,6 +12,11 @@ document.getElementById('startBtn').onclick = () => {
   document.getElementById('quizArea').style.display = 'block';
 };
 
+// ⚠️ 名前重複エラーを受け取った場合の処理
+socket.on('nameRejected', (data) => {
+  alert(data.reason || "名前が使用できません");
+});
+
 socket.on('newQuestion', (data) => {
   document.getElementById('question').innerText = data.question;
   document.getElementById('answerInput').value = '';

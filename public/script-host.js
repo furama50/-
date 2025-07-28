@@ -1,5 +1,7 @@
 const socket = io();
 
+socket.emit('registerHost');
+
 // あらかじめ用意した問題と正解
 const questions = [
   { question: "日本の首都は？", correct: ["東京", "とうきょう"] },

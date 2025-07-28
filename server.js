@@ -7,6 +7,8 @@ const server = http.createServer(app);
 const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
+let hostSocketId = null;
+
 app.use(express.static("public"));
 
 // プレイヤー情報と回答
@@ -18,12 +20,33 @@ io.on("connection", (socket) => {
 
   // プレイヤーが名前を登録
   socket.on("registerPlayer", (data) => {
-    players[socket.id] = { name: data.name };
-    console.log(`📝 登録: ${socket.id} → ${data.name}`);
+    const requestedName = data.name.trim();
 
-    // 現在のプレイヤー一覧を全員（特にホスト）に通知
+    // ⚠️ 同じ名前がすでに登録されているかチェック
+    const nameExists = Object.values(players).some(p => p.name === requestedName);
+
+    if (nameExists) {
+      socket.emit("nameRejected", { reason: "この名前はすでに使われています。別の名前を入力してください。" });
+      return;
+    }
+
+    players[socket.id] = { name: requestedName };
+    console.log(`📝 登録: ${socket.id} → ${requestedName}`);
+
     const playerList = Object.values(players).map(p => p.name);
-    io.emit("updatePlayerList", playerList);
+    if (hostSocketId) {
+      io.to(hostSocketId).emit("updatePlayerList", playerList);
+    }
+  });
+
+
+  socket.on("registerHost", () => {
+    hostSocketId = socket.id;
+    console.log("🎮 ホスト登録:", socket.id);
+
+    // 登録時に現在のプレイヤー一覧を即送信
+    const playerList = Object.values(players).map(p => p.name);
+    socket.emit("updatePlayerList", playerList);
   });
 
   // ホストが問題を送信
@@ -81,12 +104,10 @@ io.on("connection", (socket) => {
     delete players[socket.id];
 
     const playerList = Object.values(players).map(p => p.name);
-    io.emit("updatePlayerList", playerList);
+    if (hostSocketId) {
+      io.to(hostSocketId).emit("updatePlayerList", playerList);
+    }
   });
-
-    // 新しく接続したクライアントに、現在のプレイヤー一覧を送信
-  const currentPlayerList = Object.values(players).map(p => p.name);
-  socket.emit("updatePlayerList", currentPlayerList);
 });
 
 server.listen(PORT, () => {
