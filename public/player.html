@@ -1,81 +1,204 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>プレイヤー画面（記述式）</title>
+  <meta charset="UTF-8">
+  <title>プレイヤー画面</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-  body {
-    font-family: sans-serif;
-    padding: 1rem;
-    margin: 0;
-    box-sizing: border-box;
-    background-color: #f7f7f7;
-  }
-
-  input, button {
-    font-size: 1.1rem;
-    padding: 0.7em;
-    margin: 0.6em 0;
-    width: 100%;
-    max-width: 500px;
-    box-sizing: border-box;
-  }
-
-  button {
-    background-color: #4285f4;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: background-color 0.3s ease;
-  }
-
-  button:active {
-    background-color: #3367d6;
-  }
-
-  #winnerDisplay {
-    font-size: 1.3rem;
-    font-weight: bold;
-    color: #333;
-    margin-top: 1.5em;
-    text-align: center;
-  }
-
-  ul {
-    padding-left: 1.5em;
-    font-size: 1rem;
-  }
-
-  @media (min-width: 600px) {
+  <style>
     body {
-      max-width: 700px;
+      font-family: sans-serif;
+      padding: 1rem;
+      margin: 0;
+      background: #f0f0f0;
+    }
+
+    #nameArea, #quizArea {
+      max-width: 500px;
       margin: auto;
     }
-  }
-</style>
 
+    input, button {
+      font-size: 1.1rem;
+      padding: 0.7em;
+      margin: 0.6em 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #34a853;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+
+    #question {
+      font-size: 1.2rem;
+      margin: 1em 0;
+      font-weight: bold;
+    }
+
+    #winnerBox {
+      font-size: 1.3rem;
+      text-align: center;
+      margin-top: 1em;
+      font-weight: bold;
+      color: #222;
+    }
+
+    #answerBox {
+      margin-top: 1em;
+    }
+
+    .highlight {
+      background-color: #fff8c6;
+      padding: 0.5em;
+      border-radius: 6px;
+    }
+
+    .correct-answer {
+      margin-top: 1em;
+      padding: 0.8em;
+      background: #dff0d8;
+      border-left: 5px solid #4caf50;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-  <h2>プレイヤー画面</h2>
 
   <div id="nameArea">
-    <input id="playerName" placeholder="あなたの名前">
-    <button id="startBtn">開始</button>
+    <h2>名前を入力してください</h2>
+    <input type="text" id="playerName" placeholder="例：たろう">
+    <button id="startBtn">参加</button>
   </div>
 
-  <div id="quizArea" style="display:none;">
-    <div id="question"></div><br>
-    <input id="answerInput" placeholder="ここに回答を入力" style="width: 250px;">
-    <button id="answerBtn">回答を送信</button>
-    <div id="winnerBox" style="margin-top: 20px;"></div>
-  </div>
+  <div id="quizArea" style="display: none;">
+    <div id="question">問題が表示されます</div>
 
-  <div id="submittedAnswer" style="margin-top: 10px; font-weight: bold;"></div>
+    <div id="answerBox">
+      <input type="text" id="answerInput" placeholder="ここに回答を入力">
+      <button id="answerBtn">回答する</button>
+      <button id="buzzerBtn" style="display:none;">早押しボタン！</button>
+    </div>
+
+    <div id="winnerBox"></div>
+    <div id="correctDisplay" class="correct-answer" style="display: none;"></div>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="script-player.js"></script>
+  <script>
+    const socket = io();
+    let playerName = '';
+    let answerLocked = false;
+    let currentMode = 'quiz';
+
+    document.getElementById('startBtn').onclick = () => {
+      playerName = document.getElementById('playerName').value.trim();
+      if (!playerName) return alert("名前を入力してください");
+
+      socket.emit('registerPlayer', { name: playerName });
+
+      document.getElementById('nameArea').style.display = 'none';
+      document.getElementById('quizArea').style.display = 'block';
+    };
+
+    document.getElementById('answerBtn').onclick = () => {
+      if (answerLocked) return;
+      const input = document.getElementById('answerInput').value.trim();
+      if (!input) return alert("回答を入力してください");
+
+      socket.emit('sendAnswer', { name: playerName, answer: input });
+    };
+
+    document.getElementById('buzzerBtn').onclick = () => {
+      socket.emit('buzzPressed');
+      document.getElementById('buzzerBtn').disabled = true;
+    };
+
+    socket.on('newQuestion', (data) => {
+      document.getElementById('question').innerText = data.question;
+      document.getElementById('answerInput').value = '';
+      document.getElementById('winnerBox').textContent = '';
+      document.getElementById('correctDisplay').style.display = 'none';
+      answerLocked = false;
+
+      if (currentMode === 'quiz') {
+        document.getElementById('answerBtn').style.display = 'inline-block';
+        document.getElementById('buzzerBtn').style.display = 'none';
+      } else {
+        document.getElementById('answerBtn').style.display = 'none';
+        document.getElementById('buzzerBtn').style.display = 'inline-block';
+        document.getElementById('buzzerBtn').disabled = false;
+      }
+    });
+
+    socket.on('showCorrectAnswer', (data) => {
+      answerLocked = true;
+      const correctBox = document.getElementById('correctDisplay');
+      const correct = Array.isArray(data.correct) ? data.correct.join(' / ') : data.correct;
+      correctBox.textContent = `✅ 正解: ${correct}`;
+      correctBox.style.display = 'block';
+    });
+
+    socket.on('playerAnswer', (data) => {
+      // 自分の回答なら強調表示
+      if (data.name === playerName) {
+        document.getElementById('answerInput').classList.add('highlight');
+        setTimeout(() => {
+          document.getElementById('answerInput').classList.remove('highlight');
+        }, 1000);
+      }
+    });
+
+    socket.on('correctPlayers', (data) => {
+      const box = document.getElementById('winnerBox');
+      const { correctPlayers, winner } = data;
+
+      if (correctPlayers.length === 0) {
+        box.textContent = "😢 正解者がいませんでした";
+        return;
+      }
+
+      // スロット風アニメーション
+      let index = 0;
+      const names = correctPlayers.map(p => p.name);
+      const duration = 5000;
+      const interval = 100;
+      const totalSteps = duration / interval;
+      let step = 0;
+
+      const intervalId = setInterval(() => {
+        box.innerHTML = `🎰 抽選中... <strong>${names[index]}</strong>`;
+        index = (index + 1) % names.length;
+        step++;
+        if (step >= totalSteps) {
+          clearInterval(intervalId);
+          box.innerHTML = `🎉 正解者の中から選ばれたのは：<strong>${winner}</strong> さん！`;
+        }
+      }, interval);
+    });
+
+    socket.on('modeChanged', (mode) => {
+      currentMode = mode;
+    });
+
+    socket.on('buzzerResult', (data) => {
+      document.getElementById('winnerBox').innerHTML =
+        `🚨 回答権は <strong>${data.winner}</strong> さんです！`;
+      document.getElementById('buzzerBtn').disabled = true;
+    });
+
+    socket.on('buzzerReset', () => {
+      document.getElementById('winnerBox').textContent = '';
+      document.getElementById('buzzerBtn').disabled = false;
+    });
+  </script>
 </body>
 </html>

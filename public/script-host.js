@@ -1,8 +1,7 @@
 const socket = io();
-
 socket.emit('registerHost');
 
-// あらかじめ用意した問題と正解
+// 問題リスト（複数の正解に対応）
 const questions = [
   { question: "日本の首都は？", correct: ["東京", "とうきょう"] },
   { question: "富士山の標高は？（単位：m）", correct: ["3776"] },
@@ -10,13 +9,20 @@ const questions = [
 ];
 
 let currentIndex = 0;
+let currentMode = "quiz"; // "quiz" or "buzzer"
 
+// DOM
 const nextBtn = document.getElementById('nextBtn');
 const revealBtn = document.getElementById('revealBtn');
+const resetBtn = document.getElementById('resetBtn');
+const modeSelect = document.getElementById('modeSelect');
 const questionDisplay = document.getElementById('questionDisplay');
 const answerList = document.getElementById('answerList');
 const winnerDisplay = document.getElementById('winnerDisplay');
+const playerList = document.getElementById('playerList');
+const playerCount = document.getElementById('playerCount');
 
+// イベント登録
 nextBtn.onclick = () => {
   if (currentIndex < questions.length) {
     const q = questions[currentIndex];
@@ -41,7 +47,16 @@ revealBtn.onclick = () => {
   }
 };
 
-// 回答の受信
+resetBtn.onclick = () => {
+  socket.emit('resetBuzzer');
+};
+
+modeSelect.onchange = () => {
+  currentMode = modeSelect.value;
+  socket.emit('changeMode', currentMode);
+};
+
+// 回答受信
 socket.on('playerAnswer', (data) => {
   let li = [...answerList.children].find(el => el.dataset.name === data.name);
   if (!li) {
@@ -52,10 +67,9 @@ socket.on('playerAnswer', (data) => {
   li.textContent = `${data.name}：${data.answer}`;
 });
 
-// 抽選結果の表示
+// 正解者と抽選
 socket.on('correctPlayers', (data) => {
- const box = document.getElementById('winnerDisplay');
-
+  const box = winnerDisplay;
   const { correctPlayers, winner } = data;
 
   if (correctPlayers.length === 0) {
@@ -63,11 +77,11 @@ socket.on('correctPlayers', (data) => {
     return;
   }
 
-  // 🎰 アニメーション開始
+  // 🎰 抽選アニメーション（5秒）
   let index = 0;
   const names = correctPlayers.map(p => p.name);
-  const duration = 5000; // 5秒
-  const interval = 100;  // 切り替え間隔
+  const duration = 5000;
+  const interval = 100;
   const totalSteps = duration / interval;
   let step = 0;
 
@@ -75,7 +89,6 @@ socket.on('correctPlayers', (data) => {
     box.innerHTML = `🎲 抽選中... <strong>${names[index]}</strong>`;
     index = (index + 1) % names.length;
     step++;
-
     if (step >= totalSteps) {
       clearInterval(intervalId);
       box.innerHTML = `🎉 正解者の中から選ばれたのは：<strong>${winner}</strong> さん！`;
@@ -83,17 +96,19 @@ socket.on('correctPlayers', (data) => {
   }, interval);
 });
 
-// 参加者一覧の受信と表示
+// プレイヤー一覧
 socket.on('updatePlayerList', (names) => {
-  const playerList = document.getElementById('playerList');
-  const playerCount = document.getElementById('playerCount');
-
   playerList.innerHTML = '';
   names.forEach(name => {
     const li = document.createElement('li');
     li.textContent = name;
     playerList.appendChild(li);
   });
-
   playerCount.textContent = `(${names.length}人)`;
+});
+
+// モード変更時のUI反映（初期化用）
+socket.on('modeChanged', (mode) => {
+  currentMode = mode;
+  modeSelect.value = mode;
 });

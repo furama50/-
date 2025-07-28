@@ -13,7 +13,7 @@
     background-color: #f7f7f7;
   }
 
-  input, button {
+  input, button, select {
     font-size: 1.1rem;
     padding: 0.7em;
     margin: 0.6em 0;
@@ -56,16 +56,24 @@
     }
   }
 </style>
-
 </head>
 <body>
   <h2>ホスト画面</h2>
+
+  <!-- モード切替 -->
+  <label>モード切替:
+    <select id="modeSelect">
+      <option value="quiz">通常モード</option>
+      <option value="buzzer">早押しモード</option>
+    </select>
+  </label>
+  <button id="resetBtn">早押しリセット</button>
 
   <button id="nextBtn">次の問題を出す</button>
   <button id="revealBtn" disabled>正解を表示</button>
 
   <div id="currentQuestionBox">
-    <h3>現在の問題</h3>
+    <h3>📘 現在の問題</h3>
     <div id="questionDisplay"></div>
   </div>
 
@@ -74,7 +82,7 @@
   <h3>👥 現在の参加者 <span id="playerCount">(0人)</span></h3>
   <ul id="playerList"></ul>
 
-  <h3>回答一覧</h3>
+  <h3>📝 回答一覧</h3>
   <ul id="answerList"></ul>
 
   <h3>🎉 正解者からの抽選結果</h3>
@@ -84,4 +92,3 @@
   <script src="script-host.js"></script>
 </body>
 </html>
-
