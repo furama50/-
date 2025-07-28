@@ -39,6 +39,21 @@ document.getElementById('answerBtn').onclick = () => {
 
 socket.on('showCorrectAnswer', (data) => {
   answerLocked = true;
+
+  const correctList = Array.isArray(data.correct) ? data.correct : [data.correct];
+  const playerAnswer = document.getElementById('answerInput').value.trim().toLowerCase();
+  const isCorrect = correctList.some(c => c.trim().toLowerCase() === playerAnswer);
+
+  const box = document.getElementById('winnerBox');
+  const correctText = correctList.join(" / ");
+
+  if (isCorrect) {
+    box.innerHTML = `✅ <strong>正解！</strong> お見事！<br>正解は：<strong>${correctText}</strong>`;
+    box.style.color = "#2e7d32"; // 緑
+  } else {
+    box.innerHTML = `❌ <strong>残念！</strong><br>正解は：<strong>${correctText}</strong>`;
+    box.style.color = "#c62828"; // 赤
+  }
 });
 
 socket.on('correctPlayers', (data) => {
