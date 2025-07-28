@@ -22,6 +22,7 @@ socket.on('newQuestion', (data) => {
   document.getElementById('answerInput').value = '';
   answerLocked = false;
   document.getElementById('winnerBox').textContent = '';
+  document.getElementById('submittedAnswer').textContent = ''; // 👈 追加
 });
 
 document.getElementById('answerBtn').onclick = () => {
@@ -30,6 +31,10 @@ document.getElementById('answerBtn').onclick = () => {
   if (!input) return alert("回答を入力してください");
 
   socket.emit('sendAnswer', { name: playerName, answer: input });
+
+  // 👇 ここで自分の送信した回答を表示
+  const submitted = document.getElementById('submittedAnswer');
+  submitted.innerHTML = `✅ あなたの回答：<strong>${input}</strong>`;
 };
 
 socket.on('showCorrectAnswer', (data) => {
