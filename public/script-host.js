@@ -2,9 +2,9 @@ const socket = io();
 
 // あらかじめ用意した問題と正解
 const questions = [
-  { question: "日本の首都は？", correct: "東京" },
-  { question: "富士山の標高は？（単位：m）", correct: "3776" },
-  { question: "英語で「りんご」は？", correct: "apple" }
+  { question: "日本の首都は？", correct: ["東京", "とうきょう"] },
+  { question: "富士山の標高は？（単位：m）", correct: ["3776"] },
+  { question: "英語で「りんご」は？", correct: ["apple", "Apple", "APPLE"] }
 ];
 
 let currentIndex = 0;

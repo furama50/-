@@ -52,7 +52,14 @@ io.on("connection", (socket) => {
     io.emit("showCorrectAnswer", { correct });
 
     // 正解したプレイヤーを抽出
-    const correctPlayers = currentAnswers.filter(a => a.answer === correct);
+      // 正解を配列に統一（互換性維持）
+    const correctList = Array.isArray(correct) ? correct : [correct];
+
+    // プレイヤーの回答を小文字比較でチェック
+    const correctPlayers = currentAnswers.filter(a =>
+      correctList.some(c => a.answer.trim().toLowerCase() === c.trim().toLowerCase())
+    );
+    
     const winner =
       correctPlayers.length > 0
         ? correctPlayers[Math.floor(Math.random() * correctPlayers.length)]
