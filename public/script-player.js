@@ -33,9 +33,9 @@ document.getElementById('answerBtn').onclick = () => {
   document.getElementById('selfAnswerDisplay').textContent = `あなたの回答：${input}`;
 
   // 任意：回答後、ロックされたかのようなUI
-  answerLocked = true;
-  document.getElementById('answerInput').disabled = true;
-  document.getElementById('answerBtn').disabled = true;
+  // answerLocked = true;
+  // document.getElementById('answerInput').disabled = true;
+  // document.getElementById('answerBtn').disabled = true;
 };
 
 buzzerBtn.onclick = () => {
@@ -70,16 +70,19 @@ socket.on('correctPlayers', (data) => {
 
 // モード切替イベント（ホストが操作）
 socket.on('modeChanged', (mode) => {
+  currentMode = mode;
+
   if (mode === 'quiz') {
-    quizArea.style.display = 'block';
-    buzzerArea.style.display = 'none';
+    document.getElementById('answerBtn').style.display = 'inline-block';
+    document.getElementById('buzzerBtn').style.display = 'none';
+    document.getElementById('buzzerBtn').disabled = true; // 念のため無効化
   } else if (mode === 'buzzer') {
-    quizArea.style.display = 'none';
-    buzzerArea.style.display = 'block';
-    buzzerBtn.disabled = false;
-    buzzerResult.textContent = '';
+    document.getElementById('answerBtn').style.display = 'none';
+    document.getElementById('buzzerBtn').style.display = 'inline-block';
+    document.getElementById('buzzerBtn').disabled = false;
   }
 });
+
 
 // 誰が早押しに成功したか表示
 socket.on('buzzerResult', ({ winner }) => {
