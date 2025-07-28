@@ -42,11 +42,36 @@ socket.on('showCorrectAnswer', (data) => {
 });
 
 socket.on('correctPlayers', (data) => {
-  const box = document.getElementById('winnerBox');
-  if (data.correctPlayers.length === 0) {
+  const box = document.getElementById('winnerBox' || 'winnerDisplay'); // ← プレイヤー用とホスト用を共通化したい場合は切り替えてください
+  const { correctPlayers, winner } = data;
+
+  if (correctPlayers.length === 0) {
     box.innerHTML = "😢 正解者がいませんでした";
-  } else {
-    box.innerHTML = `🎉 正解者の中から選ばれたのは：<strong>${data.winner}</strong> さん！`;
+    return;
   }
+
+  const names = correctPlayers.map(p => p.name);
+  let index = 0;
+  let delay = 50;      // 初期スピード（ms）
+  const maxDelay = 500; // 最終的な遅さ
+  const totalDuration = 5000; // 合計時間（ms）
+  let elapsed = 0;
+
+  function spin() {
+    box.innerHTML = `🎰 抽選中... <strong>${names[index]}</strong>`;
+    index = (index + 1) % names.length;
+
+    // 加速から減速へ：delayをだんだん増やしていく
+    delay = Math.min(maxDelay, delay * 1.15);
+    elapsed += delay;
+
+    if (elapsed < totalDuration) {
+      setTimeout(spin, delay);
+    } else {
+      box.innerHTML = `🎉 正解者の中から選ばれたのは：<strong>${winner}</strong> さん！`;
+    }
+  }
+
+  spin(); // 開始
 });
 
