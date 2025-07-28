@@ -10,14 +10,15 @@
     padding: 1rem;
     margin: 0;
     box-sizing: border-box;
+    background-color: #f7f7f7;
   }
 
   input, button {
-    font-size: 1rem;
-    padding: 0.6em;
-    margin: 0.5em 0;
+    font-size: 1.1rem;
+    padding: 0.7em;
+    margin: 0.6em 0;
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     box-sizing: border-box;
   }
 
@@ -25,27 +26,33 @@
     background-color: #4285f4;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;
   }
 
-  button:disabled {
-    background-color: #999;
-    cursor: not-allowed;
+  button:active {
+    background-color: #3367d6;
   }
 
-  #questionDisplay, #winnerDisplay {
-    font-size: 1.2rem;
-    margin: 1em 0;
+  #winnerDisplay {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #333;
+    margin-top: 1.5em;
+    text-align: center;
   }
 
   ul {
-    padding-left: 1.2em;
+    padding-left: 1.5em;
+    font-size: 1rem;
   }
 
   @media (min-width: 600px) {
-    input, button {
-      font-size: 1.1rem;
+    body {
+      max-width: 700px;
+      margin: auto;
     }
   }
 </style>

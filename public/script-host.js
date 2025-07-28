@@ -54,9 +54,33 @@ socket.on('playerAnswer', (data) => {
 
 // 抽選結果の表示
 socket.on('correctPlayers', (data) => {
-  winnerDisplay.textContent = data.correctPlayers.length > 0
-    ? `🎯 正解者の中から選ばれたのは：${data.winner} さん！`
-    : "😢 正解者がいませんでした";
+ const box = document.getElementById('winnerDisplay');
+
+  const { correctPlayers, winner } = data;
+
+  if (correctPlayers.length === 0) {
+    box.textContent = "😢 正解者がいませんでした";
+    return;
+  }
+
+  // 🎰 アニメーション開始
+  let index = 0;
+  const names = correctPlayers.map(p => p.name);
+  const duration = 5000; // 5秒
+  const interval = 100;  // 切り替え間隔
+  const totalSteps = duration / interval;
+  let step = 0;
+
+  const intervalId = setInterval(() => {
+    box.innerHTML = `🎲 抽選中... <strong>${names[index]}</strong>`;
+    index = (index + 1) % names.length;
+    step++;
+
+    if (step >= totalSteps) {
+      clearInterval(intervalId);
+      box.innerHTML = `🎉 正解者の中から選ばれたのは：<strong>${winner}</strong> さん！`;
+    }
+  }, interval);
 });
 
 // 参加者一覧の受信と表示

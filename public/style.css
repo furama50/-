@@ -1,0 +1,9 @@
+#winnerDisplay {
+  text-align: center;
+  margin: 1.5em auto;
+  line-height: 1.6;
+}
+
+html, body {
+  overflow-x: hidden;
+}
