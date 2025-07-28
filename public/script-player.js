@@ -75,28 +75,26 @@ socket.on('modeChanged', (mode) => {
   currentMode = mode;
 
   if (mode === 'quiz') {
-    // 通常モード：クイズUIを表示、早押しUIを非表示
+    // 通常モード
     quizArea.style.display = 'block';
     buzzerArea.style.display = 'none';
-
-    // 入力欄を有効に戻す
     answerInput.disabled = false;
     document.getElementById('answerBtn').disabled = false;
-
   } else if (mode === 'buzzer') {
-    // 早押しモード：早押しUIを表示、クイズUIを非表示
+    // 早押しモード
     quizArea.style.display = 'none';
     buzzerArea.style.display = 'block';
+
+    // 早押しの表示エリアをリセット
     buzzerBtn.disabled = false;
     buzzerResult.textContent = '';
+    document.getElementById('buzzerQuestion').textContent = questionElem.innerText; // 問題を表示
   }
 });
 
-// 誰が早押しに成功したか表示
-const buzzerResultDisplay = document.getElementById('buzzerResultDisplay');
-
+// 誰が早押しに成功したかを表示
 socket.on('buzzerResult', ({ winner }) => {
-  buzzerResultDisplay.innerHTML = `🚨 回答権は <strong>${winner}</strong> さんです！`;
+  buzzerResult.innerHTML = `🚨 回答権は <strong>${winner}</strong> さんです！`;
   buzzerBtn.disabled = true;
 });
 
