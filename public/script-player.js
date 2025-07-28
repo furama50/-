@@ -92,15 +92,15 @@ socket.on('modeChanged', (mode) => {
   }
 });
 
-
 // 誰が早押しに成功したか表示
+const buzzerResultDisplay = document.getElementById('buzzerResultDisplay');
+
 socket.on('buzzerResult', ({ winner }) => {
-  buzzerResult.innerHTML = `🚨 回答権は <strong>${winner}</strong> さんです！`;
+  buzzerResultDisplay.innerHTML = `🚨 回答権は <strong>${winner}</strong> さんです！`;
   buzzerBtn.disabled = true;
 });
 
-// ホストがリセットしたら再度早押し可能に
 socket.on('buzzerReset', () => {
-  buzzerResult.textContent = '';
+  buzzerResultDisplay.textContent = '';
   buzzerBtn.disabled = false;
 });
