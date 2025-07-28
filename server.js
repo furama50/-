@@ -1,4 +1,4 @@
-// ✅ server.js（サーバーサイド）
+// ✅ server.js（変更済）
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -14,20 +14,33 @@ let buzzerPressed = false;
 let buzzerWinner = null;
 
 const players = {}; // socket.id -> { name }
-let currentAnswers = []; // { name, answer }
+let currentAnswers = [];
+let currentQuestion = null; // 👈 追加
 
 app.use(express.static("public"));
 
 io.on("connection", (socket) => {
   console.log("👤 接続:", socket.id);
 
+  // プレイヤー登録時
   socket.on("registerPlayer", (data) => {
     players[socket.id] = { name: data.name };
     console.log(`登録: ${data.name}`);
 
+    // 新規プレイヤーに現在の状態を送信
+    socket.emit("modeChanged", currentMode);
+    if (currentQuestion) {
+      socket.emit("newQuestion", currentQuestion);
+    }
+    if (buzzerPressed && buzzerWinner) {
+      socket.emit("buzzerResult", { winner: buzzerWinner });
+    }
+
     // ホストにプレイヤー一覧通知
-    const playerList = Object.values(players).map(p => p.name);
-    if (hostSocketId) io.to(hostSocketId).emit("updatePlayerList", playerList);
+    if (hostSocketId) {
+      const list = Object.values(players).map(p => p.name);
+      io.to(hostSocketId).emit("updatePlayerList", list);
+    }
   });
 
   socket.on("registerHost", () => {
@@ -62,6 +75,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendQuestion", (data) => {
+    currentQuestion = data;
     currentAnswers = [];
     io.emit("newQuestion", data);
   });
