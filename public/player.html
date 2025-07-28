@@ -12,7 +12,7 @@
       background: #f0f0f0;
     }
 
-    #nameArea, #quizArea {
+    #nameArea, #quizArea, #buzzerArea {
       max-width: 500px;
       margin: auto;
     }
@@ -69,6 +69,22 @@
       border-left: 5px solid #4caf50;
       font-weight: bold;
     }
+
+    #buzzerArea {
+      text-align: center;
+      margin-top: 2em;
+    }
+
+    #buzzerQuestion {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    #buzzerResult {
+      font-size: 1.2rem;
+      margin-top: 1em;
+    }
   </style>
 </head>
 <body>
@@ -79,7 +95,7 @@
     <button id="startBtn">参加</button>
   </div>
 
-  <!-- 回答モード用エリア -->
+  <!-- 通常モード -->
   <div id="quizArea" style="display: none;">
     <div id="question">問題が表示されます</div>
 
@@ -90,139 +106,18 @@
     </div>
 
     <p id="selfAnswerDisplay" style="font-weight:bold; color: #333;"></p>
-
     <div id="winnerBox"></div>
     <div id="correctDisplay" class="correct-answer" style="display: none;"></div>
   </div>
 
-  <!-- 早押しモード専用エリア -->
-  <div id="buzzerArea" style="display: none; text-align: center; margin-top: 2em;">
+  <!-- 早押しモード -->
+  <div id="buzzerArea" style="display: none;">
+    <div id="buzzerQuestion">問題が表示されます</div>
     <button id="buzzerBtn" style="font-size: 1.4rem;">早押しボタン！</button>
-    <div id="buzzerResultDisplay" style="margin-top: 1em; font-size: 1.2rem; color: #d32f2f;"></div>
+    <div id="buzzerResult"></div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-    let playerName = '';
-    let answerLocked = false;
-    let currentMode = 'quiz';
-
-    document.getElementById('startBtn').onclick = () => {
-      playerName = document.getElementById('playerName').value.trim();
-      if (!playerName) return alert("名前を入力してください");
-
-      socket.emit('registerPlayer', { name: playerName });
-
-      document.getElementById('nameArea').style.display = 'none';
-      document.getElementById('quizArea').style.display = 'block';
-    };
-
-    document.getElementById('answerBtn').onclick = () => {
-      if (answerLocked) return;
-      const input = document.getElementById('answerInput').value.trim();
-      if (!input) return alert("回答を入力してください");
-
-      socket.emit('sendAnswer', { name: playerName, answer: input });
-    };
-
-    document.getElementById('buzzerBtn').onclick = () => {
-      socket.emit('buzzPressed');
-      document.getElementById('buzzerBtn').disabled = true;
-    };
-
-    socket.on('newQuestion', (data) => {
-      document.getElementById('question').innerText = data.question;
-      document.getElementById('answerInput').value = '';
-      document.getElementById('winnerBox').textContent = '';
-      document.getElementById('correctDisplay').style.display = 'none';
-      answerLocked = false;
-
-      if (currentMode === 'quiz') {
-        document.getElementById('answerBtn').style.display = 'inline-block';
-        document.getElementById('buzzerBtn').style.display = 'none';
-      } else {
-        document.getElementById('answerBtn').style.display = 'none';
-        document.getElementById('buzzerBtn').style.display = 'inline-block';
-        document.getElementById('buzzerBtn').disabled = false;
-      }
-    });
-
-    socket.on('showCorrectAnswer', (data) => {
-      answerLocked = true;
-      const correctBox = document.getElementById('correctDisplay');
-      const correct = Array.isArray(data.correct) ? data.correct.join(' / ') : data.correct;
-      correctBox.textContent = `✅ 正解: ${correct}`;
-      correctBox.style.display = 'block';
-    });
-
-    socket.on('playerAnswer', (data) => {
-      // 自分の回答なら強調表示
-      if (data.name === playerName) {
-        document.getElementById('answerInput').classList.add('highlight');
-        setTimeout(() => {
-          document.getElementById('answerInput').classList.remove('highlight');
-        }, 1000);
-
-      // ✅ 自分の回答と変更可能なことを表示
-        document.getElementById('selfAnswerDisplay').textContent =
-          `あなたの回答：${data.answer}（※あとから変更できます）`;
-      }
-    });
-
-    socket.on('correctPlayers', (data) => {
-      const box = document.getElementById('winnerBox');
-      const { correctPlayers, winner } = data;
-
-      if (correctPlayers.length === 0) {
-        box.textContent = "😢 正解者がいませんでした";
-        return;
-      }
-
-      // スロット風アニメーション
-      let index = 0;
-      const names = correctPlayers.map(p => p.name);
-      const duration = 5000;
-      const interval = 100;
-      const totalSteps = duration / interval;
-      let step = 0;
-
-      const intervalId = setInterval(() => {
-        box.innerHTML = `🎰 抽選中... <strong>${names[index]}</strong>`;
-        index = (index + 1) % names.length;
-        step++;
-        if (step >= totalSteps) {
-          clearInterval(intervalId);
-          box.innerHTML = `🎉 正解者の中から選ばれたのは：<strong>${winner}</strong> さん！`;
-        }
-      }, interval);
-    });
-
-    socket.on('modeChanged', (mode) => {
-      currentMode = mode;
-
-      if (mode === 'quiz') {
-        document.getElementById('quizArea').style.display = 'block';
-        document.getElementById('buzzerArea').style.display = 'none';
-        document.getElementById('answerInput').disabled = false;
-        document.getElementById('answerBtn').disabled = false;
-      } else if (mode === 'buzzer') {
-        document.getElementById('quizArea').style.display = 'none';
-        document.getElementById('buzzerArea').style.display = 'block';
-        document.getElementById('buzzerBtn').disabled = false;
-      }
-    });
-
-    socket.on('buzzerResult', (data) => {
-      document.getElementById('winnerBox').innerHTML =
-        `🚨 回答権は <strong>${data.winner}</strong> さんです！`;
-      document.getElementById('buzzerBtn').disabled = true;
-    });
-
-    socket.on('buzzerReset', () => {
-      document.getElementById('winnerBox').textContent = '';
-      document.getElementById('buzzerBtn').disabled = false;
-    });
-  </script>
+  <script src="script-player.js"></script>
 </body>
 </html>
