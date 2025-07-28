@@ -79,24 +79,29 @@
     <button id="startBtn">参加</button>
   </div>
 
+  <!-- 回答モード用エリア -->
   <div id="quizArea" style="display: none;">
     <div id="question">問題が表示されます</div>
 
     <div id="answerBox">
       <input type="text" id="answerInput" placeholder="ここに回答を入力">
       <button id="answerBtn">回答する</button>
-      <button id="buzzerBtn" style="display:none;">早押しボタン！</button>
+      <p style="font-size: 0.9rem; color: #666;">※何度でも回答を変更できます</p>
     </div>
 
     <p id="selfAnswerDisplay" style="font-weight:bold; color: #333;"></p>
-    <p style="font-size: 0.9rem; color: #555;">
-      ※ 回答は後から変更できます。最後に送信した内容が採用されます。
-    </p>
-
 
     <div id="winnerBox"></div>
     <div id="correctDisplay" class="correct-answer" style="display: none;"></div>
   </div>
+
+  <!-- 早押しモード専用エリア -->
+  <div id="buzzerArea" style="display: none; text-align: center; margin-top: 2em;">
+    <div id="question">問題が表示されます</div>
+    <button id="buzzerBtn" style="font-size: 1.4rem;">早押しボタン！</button>
+    <div id="buzzerResult" style="margin-top: 1em; font-size: 1.2rem;"></div>
+  </div>
+
 
   <script src="/socket.io/socket.io.js"></script>
   <script>

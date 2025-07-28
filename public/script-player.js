@@ -73,13 +73,20 @@ socket.on('modeChanged', (mode) => {
   currentMode = mode;
 
   if (mode === 'quiz') {
-    document.getElementById('answerBtn').style.display = 'inline-block';
-    document.getElementById('buzzerBtn').style.display = 'none';
-    document.getElementById('buzzerBtn').disabled = true; // 念のため無効化
+    // 通常モード：クイズUIを表示、早押しUIを非表示
+    quizArea.style.display = 'block';
+    buzzerArea.style.display = 'none';
+
+    // 入力欄を有効に戻す
+    answerInput.disabled = false;
+    document.getElementById('answerBtn').disabled = false;
+
   } else if (mode === 'buzzer') {
-    document.getElementById('answerBtn').style.display = 'none';
-    document.getElementById('buzzerBtn').style.display = 'inline-block';
-    document.getElementById('buzzerBtn').disabled = false;
+    // 早押しモード：早押しUIを表示、クイズUIを非表示
+    quizArea.style.display = 'none';
+    buzzerArea.style.display = 'block';
+    buzzerBtn.disabled = false;
+    buzzerResult.textContent = '';
   }
 });
 
