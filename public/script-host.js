@@ -119,4 +119,13 @@ socket.on('buzzerResult', (data) => {
   if (winnerDisplay) {
     winnerDisplay.innerHTML = `🚨 回答権は <strong>${data.winner}</strong> さんです！`;
   }
+
+// 早押しリセット時にホスト画面もクリアする
+socket.on('buzzerReset', () => {
+  const winnerDisplay = document.getElementById('winnerDisplay');
+  if (winnerDisplay) {
+    winnerDisplay.textContent = '（まだ選ばれていません）';
+  }
+});
+
 });
