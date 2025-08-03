@@ -26,10 +26,19 @@ io.on("connection", (socket) => {
 
   // プレイヤー登録
   socket.on("registerPlayer", (data) => {
-    players[socket.id] = { name: data.name };
-    console.log(`登録: ${data.name}`);
+    const newName = data.name.trim();
 
-    // ホストにプレイヤー一覧送信
+  // すでに同じ名前が登録されていれば拒否
+    const nameExists = Object.values(players).some(p => p.name === newName);
+    if (nameExists) {
+      socket.emit("nameRejected", { reason: "同じ名前のプレイヤーがいます。別の名前を使ってください。" });
+      return;
+    }
+
+    players[socket.id] = { name: newName };
+    console.log(`登録: ${newName}`);
+
+    // ホストにプレイヤー一覧通知
     const playerList = Object.values(players).map(p => p.name);
     if (hostSocketId) io.to(hostSocketId).emit("updatePlayerList", playerList);
 
