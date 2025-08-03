@@ -130,10 +130,27 @@
     document.getElementById('startBtn').onclick = () => {
       playerName = document.getElementById('playerName').value.trim();
       if (!playerName) return alert("名前を入力してください");
-      socket.emit('registerPlayer', { name: playerName });
 
-      nameArea.style.display = 'none';
+      socket.emit('registerPlayer', { name: playerName });
     };
+
+    // 名前が拒否された場合の処理
+    socket.on('nameRejected', (data) => {
+      alert(data.reason); // 「同じ名前のプレイヤーがいます。別の名前を使ってください。」
+    });
+
+    socket.on('modeChanged', (mode) => {
+      // すでに参加していた場合だけ以下を実行
+      if (!playerName) return;
+
+      // ...（既存のmodeChangedの処理）
+    });
+
+    socket.on('registerPlayerSuccess', () => {
+      // プレイヤー画面に進む処理（成功時のみ）
+      document.getElementById('nameArea').style.display = 'none';
+      document.getElementById('quizArea').style.display = 'block';
+    });
 
     // 回答送信
     answerBtn.onclick = () => {

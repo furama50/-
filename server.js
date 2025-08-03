@@ -36,6 +36,7 @@ io.on("connection", (socket) => {
     }
 
     players[socket.id] = { name: newName };
+    socket.emit("registerPlayerSuccess");
     console.log(`登録: ${newName}`);
 
     // ホストにプレイヤー一覧通知
