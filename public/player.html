@@ -102,7 +102,7 @@
   <!-- 早押しモード -->
   <div id="buzzerArea" style="display: none;" class="center">
     <div id="question"></div>
-    <button id="buzzerBtn" style="font-size: 1.4rem;">🚨 早押しボタン！</button>
+    <button id="buzzerBtn" style="font-size: 1.4rem;" disabled>🚨 早押しボタン！</button>
     <div id="buzzerResult"></div>
   </div>
 
@@ -132,6 +132,15 @@
       if (!playerName) return alert("名前を入力してください");
 
       socket.emit('registerPlayer', { name: playerName });
+
+      nameArea.style.display = 'none';
+
+      if (currentMode === 'quiz') {
+        quizArea.style.display = 'block';
+      } else if (currentMode === 'buzzer') {
+        buzzerArea.style.display = 'block';
+        buzzerBtn.disabled = false; // ✅ ここで有効化
+      }
     };
 
     // 名前が拒否された場合の処理
